@@ -11,6 +11,41 @@ from typing import List, Tuple
 Point = Tuple[float, float]
 
 
+def setup_chinese_font():
+    """配置 matplotlib 中文字体，避免中文显示为方块"""
+    try:
+        import matplotlib.pyplot as plt
+        from matplotlib import font_manager
+    except ImportError:
+        return None
+
+    # 常见中文字体候选（Windows / macOS / Linux）
+    candidates = [
+        'Microsoft YaHei', 'SimHei', 'SimSun', 'PingFang SC',
+        'Heiti SC', 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'Arial Unicode MS',
+    ]
+
+    # 先查系统已安装的字体
+    installed = {f.name for f in font_manager.fontManager.ttflist}
+    for name in candidates:
+        if name in installed:
+            plt.rcParams['font.sans-serif'] = [name]
+            plt.rcParams['axes.unicode_minus'] = False  # 修复负号显示
+            return name
+
+    # 兜底：直接按文件路径注册
+    for path in ['C:/Windows/Fonts/msyh.ttc', 'C:/Windows/Fonts/simhei.ttf']:
+        if os.path.exists(path):
+            font_manager.fontManager.addfont(path)
+            prop = font_manager.FontProperties(fname=path)
+            plt.rcParams['font.sans-serif'] = [prop.get_name()]
+            plt.rcParams['axes.unicode_minus'] = False
+            return prop.get_name()
+
+    plt.rcParams['axes.unicode_minus'] = False
+    return None
+
+
 def try_plot(cities: List[Point], best_route: List[int], history: List[float]):
     """
     尝试用 matplotlib 绘图：
@@ -26,6 +61,13 @@ def try_plot(cities: List[Point], best_route: List[int], history: List[float]):
         print("[提示] 未安装 matplotlib，跳过绘图。")
         print("       安装方法: pip install matplotlib")
         return None
+
+    # 配置中文字体
+    font_name = setup_chinese_font()
+    if font_name:
+        print(f"[字体] 使用中文字体: {font_name}")
+    else:
+        print("[提示] 未找到中文字体，图中的中文可能显示为方块。")
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 

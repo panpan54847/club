@@ -6,7 +6,6 @@
 - 低温时趋于保守，收敛到最优解
 - 通过 Metropolis 准则决定是否接受劣解
 """
-
 import random
 import math
 from typing import List, Tuple
